@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-st.title('Análisis de datos de Producción')
+st.title('Análisis de datos de Sensores en Mi Ciudad')
 uploaded_file = st.file_uploader('Choose a file')
 if uploaded_file is not None:
    df1=pd.read_csv(uploaded_file)
