@@ -19,6 +19,7 @@ if uploaded_file is not None:
    #df1_filtrado = df1[df1['Fecha Inicio'].between(inicio, fin)]
 
    # Muestra el DataFrame filtrado
-   #st.write(df1_filtrado)
+    st.subheader('Estadísticos básicos de los sensores')
+    st.write(df1.describe())
 else:
  st.warning('Necesitas cargar un archivo csv excel.')
