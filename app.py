@@ -15,7 +15,7 @@ if uploaded_file is not None:
    st.dataframe(df1["temperatura ESP32"].describe())
    min_temp = st.slider('Selecciona la temperatura mínima (°C)', min_value=-10, max_value=40, value=10)
    # Filtrar el DataFrame utilizando query
-   filtrado_df = df.query(f"`temperatura ESP32` > {min_temp}")
+   filtrado_df = df1.query(f"`temperatura ESP32` > {min_temp}")
    # Mostrar el DataFrame filtrado
    st.write("DataFrame filtrado:")
    st.write(filtrado_df)
