@@ -13,5 +13,12 @@ if uploaded_file is not None:
    st.write(df1)
    st.subheader('Estadísticos básicos de los sensores')
    st.dataframe(df1["temperatura ESP32"].describe())
+   min_temp = st.slider('Selecciona la temperatura mínima (°C)', min_value=-10, max_value=40, value=10)
+   # Filtrar el DataFrame utilizando query
+   filtrado_df = df.query(f"`Temperatura (°C)` > {min_temp}")
+   # Mostrar el DataFrame filtrado
+   st.write("DataFrame filtrado:")
+   st.write(filtrado_df)
+
 else:
  st.warning('Necesitas cargar un archivo csv excel.')
