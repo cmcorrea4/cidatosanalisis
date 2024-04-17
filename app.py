@@ -18,7 +18,7 @@ if uploaded_file is not None:
    
    st.write(df1)
    st.subheader('Estadísticos básicos de los sensores.')
-   st.dataframe(df1["temperature ESP32"].describe())
+   st.dataframe(df1["temperatura ESP32"].describe())
    
    min_temp = st.slider('Selecciona la temperatura mínima (°C)', min_value=-10, max_value=45, value=23, key=1)
    # Filtrar el DataFrame utilizando query
