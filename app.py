@@ -32,7 +32,7 @@ if uploaded_file is not None:
    # Filtrar el DataFrame utilizando query
    filtrado_df_max = df1.query(f"`temperatura ESP32` < {max_temp}")
    # Mostrar el DataFrame filtrado
-   st.subheader("Temperaturas superiores al valor configurado.")
+   st.subheader("Temperaturas Inferiores al valor configurado.")
    st.write('Dataframe Filtrado')
    st.write(filtrado_df_max)
    
