@@ -1,6 +1,5 @@
 import pandas as pd
 import streamlit as st
-import plotly.express as px
 from PIL import Image
 import numpy as np
 from datetime import datetime
@@ -68,23 +67,16 @@ if uploaded_file is not None:
             # Chart type selector
             chart_type = st.selectbox(
                 "Seleccione tipo de gráfico",
-                ["Línea", "Área", "Dispersión"]
+                ["Línea", "Área", "Barra"]
             )
             
             # Create plot based on selection
             if chart_type == "Línea":
-                fig = px.line(df1, y="temperatura ESP32", title="Temperatura a lo largo del tiempo")
+                st.line_chart(df1["temperatura ESP32"])
             elif chart_type == "Área":
-                fig = px.area(df1, y="temperatura ESP32", title="Área de temperatura")
+                st.area_chart(df1["temperatura ESP32"])
             else:
-                fig = px.scatter(df1, y="temperatura ESP32", title="Dispersión de temperatura")
-                
-            fig.update_layout(
-                xaxis_title="Tiempo",
-                yaxis_title="Temperatura (°C)",
-                hovermode='x unified'
-            )
-            st.plotly_chart(fig, use_container_width=True)
+                st.bar_chart(df1["temperatura ESP32"])
 
             # Raw data display with toggle
             if st.checkbox('Mostrar datos crudos'):
