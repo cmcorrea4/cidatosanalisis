@@ -1,3 +1,4 @@
+
 import pandas as pd
 import streamlit as st
 from PIL import Image
@@ -41,15 +42,12 @@ eafit_location = pd.DataFrame({
 st.subheader("📍 Ubicación de los Sensores - Universidad EAFIT")
 st.map(eafit_location, zoom=15)
 
-# Image display
-#try:
-#    image = Image.open('grafana2.jpg')
-#    st.image(image, caption='Dashboard de Sensores', use_column_width=True)
-#except FileNotFoundError:
-#    st.warning('Imagen no encontrada. Verifique la ruta del archivo.')
-
 # File uploader
 uploaded_file = st.file_uploader('Seleccione archivo CSV', type=['csv'])
+
+# Definir nombres de columnas
+TEMP_COL = 'temperatura {device="ESP32", name="Sensor 1"}'
+HUM_COL = 'humedad {device="ESP32", name="Sensor 1"}'
 
 if uploaded_file is not None:
     try:
@@ -67,7 +65,7 @@ if uploaded_file is not None:
             # Variable selector
             variable = st.selectbox(
                 "Seleccione variable a visualizar",
-                ["temperatura ESP32", "humedad ESP32", "Ambas variables"]
+                [TEMP_COL, HUM_COL, "Ambas variables"]
             )
             
             # Chart type selector
@@ -80,19 +78,19 @@ if uploaded_file is not None:
             if variable == "Ambas variables":
                 st.write("### Temperatura")
                 if chart_type == "Línea":
-                    st.line_chart(df1["temperatura ESP32"])
+                    st.line_chart(df1[TEMP_COL])
                 elif chart_type == "Área":
-                    st.area_chart(df1["temperatura ESP32"])
+                    st.area_chart(df1[TEMP_COL])
                 else:
-                    st.bar_chart(df1["temperatura ESP32"])
+                    st.bar_chart(df1[TEMP_COL])
                     
                 st.write("### Humedad")
                 if chart_type == "Línea":
-                    st.line_chart(df1["humedad ESP32"])
+                    st.line_chart(df1[HUM_COL])
                 elif chart_type == "Área":
-                    st.area_chart(df1["humedad ESP32"])
+                    st.area_chart(df1[HUM_COL])
                 else:
-                    st.bar_chart(df1["humedad ESP32"])
+                    st.bar_chart(df1[HUM_COL])
             else:
                 if chart_type == "Línea":
                     st.line_chart(df1[variable])
@@ -111,7 +109,7 @@ if uploaded_file is not None:
             # Variable selector for statistics
             stat_variable = st.radio(
                 "Seleccione variable para estadísticas",
-                ["temperatura ESP32", "humedad ESP32"]
+                [TEMP_COL, HUM_COL]
             )
             
             # Statistical summary
@@ -124,7 +122,7 @@ if uploaded_file is not None:
             
             with col2:
                 # Additional statistics
-                if stat_variable == "temperatura ESP32":
+                if stat_variable == TEMP_COL:
                     st.metric("Temperatura Promedio", f"{stats_df['mean']:.2f}°C")
                     st.metric("Temperatura Máxima", f"{stats_df['max']:.2f}°C")
                     st.metric("Temperatura Mínima", f"{stats_df['min']:.2f}°C")
@@ -139,7 +137,7 @@ if uploaded_file is not None:
             # Variable selector for filtering
             filter_variable = st.selectbox(
                 "Seleccione variable para filtrar",
-                ["temperatura ESP32", "humedad ESP32"]
+                [TEMP_COL, HUM_COL]
             )
             
             col1, col2 = st.columns(2)
@@ -154,7 +152,7 @@ if uploaded_file is not None:
                     key="min_val"
                 )
                 
-                filtrado_df_min = df1.query(f"`{filter_variable}` > {min_val}")
+                filtrado_df_min = df1[df1[filter_variable] > min_val]
                 st.write(f"Registros con {filter_variable} superior a", 
                         f"{min_val}{'°C' if 'temperatura' in filter_variable else '%'}:")
                 st.dataframe(filtrado_df_min)
@@ -169,7 +167,7 @@ if uploaded_file is not None:
                     key="max_val"
                 )
                 
-                filtrado_df_max = df1.query(f"`{filter_variable}` < {max_val}")
+                filtrado_df_max = df1[df1[filter_variable] < max_val]
                 st.write(f"Registros con {filter_variable} inferior a",
                         f"{max_val}{'°C' if 'temperatura' in filter_variable else '%'}:")
                 st.dataframe(filtrado_df_max)
@@ -216,4 +214,3 @@ st.markdown("""
     Desarrollado para el análisis de datos de sensores urbanos.
     Ubicación: Universidad EAFIT, Medellín, Colombia
 """)
-
