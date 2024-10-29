@@ -26,8 +26,8 @@ st.markdown("""
 # Title and description
 st.title('📊 Análisis de datos de Sensores en Mi Ciudad')
 st.markdown("""
-    Esta aplicación permite analizar datos de sensores de temperatura y otros parámetros
-    recolectados en diferentes puntos de la ciudad.
+    Esta aplicación permite analizar datos de temperatura y humedad
+    recolectados por sensores ESP32 en diferentes puntos de la ciudad.
 """)
 
 # Create map data for EAFIT
@@ -40,6 +40,13 @@ eafit_location = pd.DataFrame({
 # Display map
 st.subheader("📍 Ubicación de los Sensores - Universidad EAFIT")
 st.map(eafit_location, zoom=15)
+
+# Image display
+try:
+    image = Image.open('grafana2.jpg')
+    st.image(image, caption='Dashboard de Sensores', use_column_width=True)
+except FileNotFoundError:
+    st.warning('Imagen no encontrada. Verifique la ruta del archivo.')
 
 # File uploader
 uploaded_file = st.file_uploader('Seleccione archivo CSV', type=['csv'])
@@ -57,6 +64,12 @@ if uploaded_file is not None:
         with tab1:
             st.subheader('Visualización de Datos')
             
+            # Variable selector
+            variable = st.selectbox(
+                "Seleccione variable a visualizar",
+                ["temperatura ESP32", "humedad ESP32", "Ambas variables"]
+            )
+            
             # Chart type selector
             chart_type = st.selectbox(
                 "Seleccione tipo de gráfico",
@@ -64,12 +77,29 @@ if uploaded_file is not None:
             )
             
             # Create plot based on selection
-            if chart_type == "Línea":
-                st.line_chart(df1["temperatura ESP32"])
-            elif chart_type == "Área":
-                st.area_chart(df1["temperatura ESP32"])
+            if variable == "Ambas variables":
+                st.write("### Temperatura")
+                if chart_type == "Línea":
+                    st.line_chart(df1["temperatura ESP32"])
+                elif chart_type == "Área":
+                    st.area_chart(df1["temperatura ESP32"])
+                else:
+                    st.bar_chart(df1["temperatura ESP32"])
+                    
+                st.write("### Humedad")
+                if chart_type == "Línea":
+                    st.line_chart(df1["humedad ESP32"])
+                elif chart_type == "Área":
+                    st.area_chart(df1["humedad ESP32"])
+                else:
+                    st.bar_chart(df1["humedad ESP32"])
             else:
-                st.bar_chart(df1["temperatura ESP32"])
+                if chart_type == "Línea":
+                    st.line_chart(df1[variable])
+                elif chart_type == "Área":
+                    st.area_chart(df1[variable])
+                else:
+                    st.bar_chart(df1[variable])
 
             # Raw data display with toggle
             if st.checkbox('Mostrar datos crudos'):
@@ -78,8 +108,14 @@ if uploaded_file is not None:
         with tab2:
             st.subheader('Análisis Estadístico')
             
+            # Variable selector for statistics
+            stat_variable = st.radio(
+                "Seleccione variable para estadísticas",
+                ["temperatura ESP32", "humedad ESP32"]
+            )
+            
             # Statistical summary
-            stats_df = df1["temperatura ESP32"].describe()
+            stats_df = df1[stat_variable].describe()
             
             col1, col2 = st.columns(2)
             
@@ -88,41 +124,54 @@ if uploaded_file is not None:
             
             with col2:
                 # Additional statistics
-                st.metric("Temperatura Promedio", f"{stats_df['mean']:.2f}°C")
-                st.metric("Temperatura Máxima", f"{stats_df['max']:.2f}°C")
-                st.metric("Temperatura Mínima", f"{stats_df['min']:.2f}°C")
+                if stat_variable == "temperatura ESP32":
+                    st.metric("Temperatura Promedio", f"{stats_df['mean']:.2f}°C")
+                    st.metric("Temperatura Máxima", f"{stats_df['max']:.2f}°C")
+                    st.metric("Temperatura Mínima", f"{stats_df['min']:.2f}°C")
+                else:
+                    st.metric("Humedad Promedio", f"{stats_df['mean']:.2f}%")
+                    st.metric("Humedad Máxima", f"{stats_df['max']:.2f}%")
+                    st.metric("Humedad Mínima", f"{stats_df['min']:.2f}%")
 
         with tab3:
-            st.subheader('Filtros de Temperatura')
+            st.subheader('Filtros de Datos')
+            
+            # Variable selector for filtering
+            filter_variable = st.selectbox(
+                "Seleccione variable para filtrar",
+                ["temperatura ESP32", "humedad ESP32"]
+            )
             
             col1, col2 = st.columns(2)
             
             with col1:
-                # Minimum temperature filter
-                min_temp = st.slider(
-                    'Temperatura mínima',
-                    float(df1["temperatura ESP32"].min()),
-                    float(df1["temperatura ESP32"].max()),
-                    float(df1["temperatura ESP32"].mean()),
-                    key="min_temp"
+                # Minimum value filter
+                min_val = st.slider(
+                    f'Valor mínimo de {filter_variable}',
+                    float(df1[filter_variable].min()),
+                    float(df1[filter_variable].max()),
+                    float(df1[filter_variable].mean()),
+                    key="min_val"
                 )
                 
-                filtrado_df_min = df1.query(f"`temperatura ESP32` > {min_temp}")
-                st.write("Registros con temperatura superior a", min_temp, "°C:")
+                filtrado_df_min = df1.query(f"`{filter_variable}` > {min_val}")
+                st.write(f"Registros con {filter_variable} superior a", 
+                        f"{min_val}{'°C' if 'temperatura' in filter_variable else '%'}:")
                 st.dataframe(filtrado_df_min)
                 
             with col2:
-                # Maximum temperature filter
-                max_temp = st.slider(
-                    'Temperatura máxima',
-                    float(df1["temperatura ESP32"].min()),
-                    float(df1["temperatura ESP32"].max()),
-                    float(df1["temperatura ESP32"].mean()),
-                    key="max_temp"
+                # Maximum value filter
+                max_val = st.slider(
+                    f'Valor máximo de {filter_variable}',
+                    float(df1[filter_variable].min()),
+                    float(df1[filter_variable].max()),
+                    float(df1[filter_variable].mean()),
+                    key="max_val"
                 )
                 
-                filtrado_df_max = df1.query(f"`temperatura ESP32` < {max_temp}")
-                st.write("Registros con temperatura inferior a", max_temp, "°C:")
+                filtrado_df_max = df1.query(f"`{filter_variable}` < {max_val}")
+                st.write(f"Registros con {filter_variable} inferior a",
+                        f"{max_val}{'°C' if 'temperatura' in filter_variable else '%'}:")
                 st.dataframe(filtrado_df_max)
 
             # Download filtered data
@@ -150,7 +199,9 @@ if uploaded_file is not None:
             with col2:
                 st.write("### Detalles del Sensor")
                 st.write("- Tipo: ESP32")
-                st.write("- Variable medida: Temperatura")
+                st.write("- Variables medidas:")
+                st.write("  * Temperatura (°C)")
+                st.write("  * Humedad (%)")
                 st.write("- Frecuencia de medición: Según configuración")
                 st.write("- Ubicación: Campus universitario")
 
@@ -159,6 +210,12 @@ if uploaded_file is not None:
 else:
     st.warning('Por favor, cargue un archivo CSV para comenzar el análisis.')
     
+# Footer
+st.markdown("""
+    ---
+    Desarrollado para el análisis de datos de sensores urbanos.
+    Ubicación: Universidad EAFIT, Medellín, Colombia
+""")
 # Footer
 st.markdown("""
     ---
