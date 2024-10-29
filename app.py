@@ -216,9 +216,4 @@ st.markdown("""
     Desarrollado para el análisis de datos de sensores urbanos.
     Ubicación: Universidad EAFIT, Medellín, Colombia
 """)
-# Footer
-st.markdown("""
-    ---
-    Desarrollado para el análisis de datos de sensores urbanos.
-    Ubicación: Universidad EAFIT, Medellín, Colombia
-""")
+
