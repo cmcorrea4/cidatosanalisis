@@ -42,11 +42,11 @@ st.subheader("📍 Ubicación de los Sensores - Universidad EAFIT")
 st.map(eafit_location, zoom=15)
 
 # Image display
-try:
-    image = Image.open('grafana2.jpg')
-    st.image(image, caption='Dashboard de Sensores', use_column_width=True)
-except FileNotFoundError:
-    st.warning('Imagen no encontrada. Verifique la ruta del archivo.')
+#try:
+#    image = Image.open('grafana2.jpg')
+#    st.image(image, caption='Dashboard de Sensores', use_column_width=True)
+#except FileNotFoundError:
+#    st.warning('Imagen no encontrada. Verifique la ruta del archivo.')
 
 # File uploader
 uploaded_file = st.file_uploader('Seleccione archivo CSV', type=['csv'])
