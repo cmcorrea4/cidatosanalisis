@@ -1,4 +1,3 @@
-
 import pandas as pd
 import streamlit as st
 from PIL import Image
@@ -45,14 +44,18 @@ st.map(eafit_location, zoom=15)
 # File uploader
 uploaded_file = st.file_uploader('Seleccione archivo CSV', type=['csv'])
 
-# Definir nombres de columnas
-TEMP_COL = 'temperatura {device="ESP32", name="Sensor 1"}'
-HUM_COL = 'humedad {device="ESP32", name="Sensor 1"}'
-
 if uploaded_file is not None:
     try:
         # Load and process data
         df1 = pd.read_csv(uploaded_file)
+        
+        # Renombrar columnas para simplificar
+        column_mapping = {
+            'temperatura {device="ESP32", name="Sensor 1"}': 'temperatura',
+            'humedad {device="ESP32", name="Sensor 1"}': 'humedad'
+        }
+        df1 = df1.rename(columns=column_mapping)
+        
         df1['Time'] = pd.to_datetime(df1['Time'])
         df1 = df1.set_index('Time')
 
@@ -65,7 +68,7 @@ if uploaded_file is not None:
             # Variable selector
             variable = st.selectbox(
                 "Seleccione variable a visualizar",
-                [TEMP_COL, HUM_COL, "Ambas variables"]
+                ["temperatura", "humedad", "Ambas variables"]
             )
             
             # Chart type selector
@@ -78,19 +81,19 @@ if uploaded_file is not None:
             if variable == "Ambas variables":
                 st.write("### Temperatura")
                 if chart_type == "Línea":
-                    st.line_chart(df1[TEMP_COL])
+                    st.line_chart(df1["temperatura"])
                 elif chart_type == "Área":
-                    st.area_chart(df1[TEMP_COL])
+                    st.area_chart(df1["temperatura"])
                 else:
-                    st.bar_chart(df1[TEMP_COL])
+                    st.bar_chart(df1["temperatura"])
                     
                 st.write("### Humedad")
                 if chart_type == "Línea":
-                    st.line_chart(df1[HUM_COL])
+                    st.line_chart(df1["humedad"])
                 elif chart_type == "Área":
-                    st.area_chart(df1[HUM_COL])
+                    st.area_chart(df1["humedad"])
                 else:
-                    st.bar_chart(df1[HUM_COL])
+                    st.bar_chart(df1["humedad"])
             else:
                 if chart_type == "Línea":
                     st.line_chart(df1[variable])
@@ -109,7 +112,7 @@ if uploaded_file is not None:
             # Variable selector for statistics
             stat_variable = st.radio(
                 "Seleccione variable para estadísticas",
-                [TEMP_COL, HUM_COL]
+                ["temperatura", "humedad"]
             )
             
             # Statistical summary
@@ -122,7 +125,7 @@ if uploaded_file is not None:
             
             with col2:
                 # Additional statistics
-                if stat_variable == TEMP_COL:
+                if stat_variable == "temperatura":
                     st.metric("Temperatura Promedio", f"{stats_df['mean']:.2f}°C")
                     st.metric("Temperatura Máxima", f"{stats_df['max']:.2f}°C")
                     st.metric("Temperatura Mínima", f"{stats_df['min']:.2f}°C")
@@ -137,7 +140,7 @@ if uploaded_file is not None:
             # Variable selector for filtering
             filter_variable = st.selectbox(
                 "Seleccione variable para filtrar",
-                [TEMP_COL, HUM_COL]
+                ["temperatura", "humedad"]
             )
             
             col1, col2 = st.columns(2)
@@ -154,7 +157,7 @@ if uploaded_file is not None:
                 
                 filtrado_df_min = df1[df1[filter_variable] > min_val]
                 st.write(f"Registros con {filter_variable} superior a", 
-                        f"{min_val}{'°C' if 'temperatura' in filter_variable else '%'}:")
+                        f"{min_val}{'°C' if filter_variable == 'temperatura' else '%'}:")
                 st.dataframe(filtrado_df_min)
                 
             with col2:
@@ -169,7 +172,7 @@ if uploaded_file is not None:
                 
                 filtrado_df_max = df1[df1[filter_variable] < max_val]
                 st.write(f"Registros con {filter_variable} inferior a",
-                        f"{max_val}{'°C' if 'temperatura' in filter_variable else '%'}:")
+                        f"{max_val}{'°C' if filter_variable == 'temperatura' else '%'}:")
                 st.dataframe(filtrado_df_max)
 
             # Download filtered data
